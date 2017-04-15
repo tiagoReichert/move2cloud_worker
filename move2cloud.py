@@ -21,7 +21,7 @@ def main():
 
     # Conectar-se ao servidor target (smart cloud)
     try:
-        dest_conn = Utils.connect(servidor="imap.notes.na.collabserv.com", porta=993, SSL=True)
+        dest_conn = Utils.connect(servidor='imap.notes.na.collabserv.com', porta=993, SSL=True)
     except:
         Utils.add_log('[ERROR] Não foi possivel se conectar ao servidor SMART CLOUD', 'log_geral.log')
         exit(2)
@@ -81,12 +81,21 @@ def main():
 
         # adicionar total de mensagens neste email
         total_msgs = 0
+        ids = []
         for pasta in pastas.keys():
             src_conn.select(mailbox=pasta, readonly=True)
             typ, data = src_conn.search(None, 'ALL')
             msgs = data[0].split()
             total_msgs += len(msgs)
-        Utils.db_add_total_messages(conn=db_conn, account=account, total_msgs=total_msgs, log_name=log_name)
+            for msg in msgs:
+                message_id, data, flags = Utils.get_message_header(connection=src_conn, message=msg)
+                equals = False
+                for id in ids:
+                    if id == message_id:
+                        equals = True
+                if not equals:
+                    ids.append(message_id)
+        Utils.db_add_total_messages(conn=db_conn, account=account, total_msgs=total_msgs, duplicates=(total_msgs-len(ids)), log_name=log_name)
         # ---------------------------------------
 
         # total de pastas
@@ -215,7 +224,7 @@ def parse_args():
                         dest='database_port',
                         help='Porta do banco de dados com contas da migração')
 
-    parser.add_argument('-paswd', '--database_pasword', required=True, action='store',
+    parser.add_argument('-paswd', '--database_password', required=True, action='store',
                         dest='database_pasword',
                         help='Senha do banco de dados com contas da migração')
 

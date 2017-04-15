@@ -63,9 +63,9 @@ class Utils:
         return cursor.fetchone()[0]
 
     @staticmethod
-    def db_add_total_messages(conn, account, total_msgs, log_name):
+    def db_add_total_messages(conn, account, total_msgs, duplicates, log_name):
         cursor = conn.cursor()
-        cursor.execute("update ACCOUNT set qtd_message={0} where id={1}".format(str(total_msgs), str(account['id'])))
+        cursor.execute("update ACCOUNT set qtd_message={0} , duplicates={1} where id={2}".format(str(total_msgs), str(duplicates), str(account['id'])))
         Utils.add_log('Adicionado total de mensagens do email '+str(account['src_email']), log_name)
 
     @staticmethod
