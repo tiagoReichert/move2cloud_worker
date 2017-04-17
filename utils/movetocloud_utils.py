@@ -102,8 +102,6 @@ class Utils:
         cursor = conn.cursor()
         cursor.execute("select count(*) from MESSAGE where account_id={0} and folder='{1}';".format(str(account['id']), str(folder)))
         qtd_msg_migrated = cursor.fetchone()
-        print qtd_msg_migrated[0]
-        print qtd_msg
         if int(qtd_msg_migrated[0]) == int(qtd_msg):
             Utils.add_log('[INFO] Pasta ' + str(folder) + ' da conta de email ' + str(
                 account['src_email']) + ' já foi migrada anteriormente -- Ignorando esta pasta', log_name)
