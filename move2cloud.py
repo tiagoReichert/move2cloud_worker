@@ -138,6 +138,7 @@ def main():
                         Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
                         continue
 
+                    qtd_migrated = 0
                     # Verificar se Mensagem já foi Migrada
                     if not Utils.is_email_already_migrated(folder=str(pasta), conn=db_conn, account=account, message_id=message_id, log_name=log_name):
 
@@ -164,8 +165,8 @@ def main():
                             qtd_msg += 1
                             # Adiciona na tela que mais um email foi migrado
                             Utils.add_log('.', log_name, new_line=False)
-                            if qtd_msg % 10 == 0:
-                                Utils.add_log('\n['+str(qtd_msg+1)+'/'+str(len(msgs))+'] ', log_name, new_line=False)
+                            if qtd_msg % 50 == 0:
+                                Utils.add_log('\n['+str(qtd_msg+1)+'/'+str(len(msgs)-qtd_migrated)+'] ', log_name, new_line=False)
                             sys.stdout.flush()
 
                             # Salva no histórico que este email ja foi migrado
@@ -174,6 +175,8 @@ def main():
                             Utils.add_log('[ERROR] Status de envio invalido: MENSAGEM='+str(message_id)+', PASTA='+str(pasta)+', EMAIL='+str(src_email), log_name)
                             Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
                             continue
+                    else:
+                        qtd_migrated += 1
 
                 Utils.add_log('', log_name)
                 Utils.add_log('----------------[ Caixa de Email Migradas '+str(qtd_pasta)+'/'+str(qtd_pastas)+' ]------------------', log_name)
