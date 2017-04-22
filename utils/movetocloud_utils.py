@@ -197,7 +197,7 @@ class Utils:
     def get_message_header(connection, message):
         typ, data = connection.fetch(message, '(FLAGS INTERNALDATE BODY[HEADER.FIELDS (MESSAGE-ID)])')
         internaldate = str(data).split('INTERNALDATE')[1].split('"')[1]
-        flags = (str(data).split('FLAGS (')[1].split(')')[0]).replace('\\\\Seen','\Seen')
+        flags = (str(data).split('FLAGS (')[1].split(')')[0]).replace('\\\\','\\')
         try:
             message_id = str(data).split('Message-ID: ')[1].split('\\')[0]
         except:
