@@ -206,7 +206,7 @@ class Utils:
                 message_id = str(data).split('Message-Id: ')[1].split('\\')[0]
             except Exception, e:
                 message_id = '[ERROR] GET_HEADER: '+str(data)+'\nERRO: '+str(e)
-
+        message_id = message_id.replace("'", "").replace('"', '')
         return message_id, internaldate, flags
 
     @staticmethod
