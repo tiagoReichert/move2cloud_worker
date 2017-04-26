@@ -77,10 +77,12 @@ def main():
             Utils.add_log('[ERROR] Não foi possivel se conectar ao email de origem: '+str(src_email), log_name)
             Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
             continue
-        pastas, qtd_pastas = Utils.formatFolders(connection=src_conn,  tipo=src_server_type)
+        pastas, qtd_pastas = Utils.format_folders(connection=src_conn, tipo=src_server_type, log_name=log_name)
 
+        #todo Criar outro serviço que faz o procedimento abaixo
         # adicionar total de mensagens neste email
         total_msgs = 0
+        erro = 0
         ids = []
         for pasta in pastas.keys():
             src_conn.select(mailbox=pasta, readonly=True)
@@ -95,7 +97,9 @@ def main():
                         equals = True
                 if not equals:
                     ids.append(message_id)
-        Utils.db_add_total_messages(conn=db_conn, account=account, total_msgs=total_msgs, duplicates=(total_msgs-len(ids)), log_name=log_name)
+                if 'list index out of range' in message_id:
+                    erro += 1
+        Utils.db_add_total_messages(conn=db_conn, account=account, total_msgs=total_msgs, duplicates=(total_msgs-len(ids)), without_messageid=erro, log_name=log_name)
         # ---------------------------------------
 
         # total de pastas
@@ -129,7 +133,7 @@ def main():
                     # Pegar Header da mensagem
                     try:
                         message_id, data, flags = Utils.get_message_header(connection=src_conn, message=msg)
-                        if '[ERROR]' in message_id:
+                        if '[ERROR]' in message_id and 'list index out of range' not in message_id:
                             Utils.add_log(message_id, log_name)
                             Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
                             continue

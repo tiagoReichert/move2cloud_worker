@@ -63,9 +63,11 @@ class Utils:
         return cursor.fetchone()[0]
 
     @staticmethod
-    def db_add_total_messages(conn, account, total_msgs, duplicates, log_name):
+    def db_add_total_messages(conn, account, total_msgs, duplicates, without_messageid, log_name):
         cursor = conn.cursor()
-        cursor.execute("update ACCOUNT set qtd_message={0} , duplicates={1} where id={2}".format(str(total_msgs), str(duplicates), str(account['id'])))
+        cursor.execute("update ACCOUNT set qtd_message={0} , duplicates={1}, without_messageid={2} where id={3}".
+                       format(str(total_msgs), str(duplicates), str(without_messageid), str(account['id'])))
+
         Utils.add_log('Adicionado total de mensagens do email '+str(account['src_email']), log_name)
 
     @staticmethod
@@ -127,11 +129,11 @@ class Utils:
         else:
             p = 'sem SSL'
             conn = imaplib.IMAP4(servidor, port=porta)
-        print '[OK] Conexão com o servidor ' + str(servidor) + ' bem sucedida '+str(p)
+        Utils.add_log('[OK] Conexão com o servidor ' + str(servidor) + ' bem sucedida '+str(p), 'log_geral.log')
         return conn
 
     @staticmethod
-    def formatFolders(connection, tipo):
+    def format_folders(connection, tipo, log_name):
         result, pastas = connection.list()
         pastas_formatadas = {}
         qtd_pastas = len(pastas)
@@ -140,7 +142,7 @@ class Utils:
             for pasta in pastas:
                 if '\All' in pasta:
                     qtd_pastas -= 1
-                    print '[WARNING] A pasta a seguir não será copiada por ter flag \All: '+pasta+' \n------------------------------------------------------------------'
+                    Utils.add_log('[WARNING] A pasta a seguir não será copiada por ter flag \All: '+pasta+' \n------------------------------------------------------------------', log_name)
                 elif '\Noselect' not in pasta:
                     p_src = pasta.split('"/" ')[-1]
                     p_dest = p_src.replace("[Gmail]/", "").replace('/', '\\').replace('"','')
@@ -156,14 +158,13 @@ class Utils:
         elif 'collabserv' in tipo:
             for pasta in pastas:
                 if '\All' in pasta:
-                    print '[WARNING] Pasta '+pasta+' não será copiada por ter flag \ALL \n------------------------------------------------------------------'
+                    Utils.add_log('[WARNING] Pasta '+pasta+' não será copiada por ter flag \ALL \n------------------------------------------------------------------', log_name)
                 else:
                     p = pasta.split('"\\\\" ')[-1]
                     pastas_formatadas[p] = p
 
         elif 'qmail' in tipo or 'roundcube' in tipo:
             for pasta in pastas:
-                print pasta
                 p_src = pasta.split(' "." ')[-1]
                 p_dest = p_src.replace('.', '\\').replace('"', '')
                 if '\Sent' in pasta:
@@ -177,8 +178,8 @@ class Utils:
                 else:
                     pastas_formatadas[p_src] = p_dest
 
-        print "[INFO] Quantidade de Pastas que seram Migradas: " + str(qtd_pastas)+''
-        print '------------------------------------------------------------------'
+        Utils.add_log('[INFO] Quantidade de Pastas que seram Migradas: ' + str(qtd_pastas)+'', log_name)
+        Utils.add_log('------------------------------------------------------------------', log_name)
         return pastas_formatadas, str(qtd_pastas)
 
     @staticmethod
