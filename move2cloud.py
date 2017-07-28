@@ -93,10 +93,10 @@ def main():
                 message_id, data, flags = Utils.get_message_header(connection=src_conn, message=msg)
                 equals = False
                 for id in ids:
-                    if id == message_id:
+                    if id == message_id+pasta:
                         equals = True
                 if not equals:
-                    ids.append(message_id)
+                    ids.append(message_id+pasta)
                 if 'list index out of range' in message_id:
                     erro += 1
         Utils.db_add_total_messages(conn=db_conn, account=account, total_msgs=total_msgs, duplicates=(total_msgs-len(ids)), without_messageid=erro, log_name=log_name)
