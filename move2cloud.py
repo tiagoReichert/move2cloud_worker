@@ -16,6 +16,7 @@ import argparse
 from utils.movetocloud_utils import Utils
 from datetime import datetime
 
+
 def main():
     p = parse_args()
 
@@ -116,7 +117,18 @@ def main():
             msgs = data[0].split()
 
             # Verificar se pasta existe, caso não exista cria
-            status, data = dest_conn.select(pastas[pasta])
+            try:
+                status, data = dest_conn.select(pastas[pasta])
+            except:
+                try:
+                    dest_conn.login(dest_email, dest_passwd)
+                    Utils.add_log('[OK] Reconectado ao email de destino: ' + dest_email, log_name)
+                except:
+                    Utils.add_log('[ERROR] Não foi possivel se reconectar ao email de destino: ' + str(dest_email),
+                                  log_name)
+                    Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
+                    continue
+
             if 'NO' in status:
                 dest_conn.create(pastas[pasta])
                 Utils.add_log("Criado a pasta: " + str(pastas[pasta]), log_name)
@@ -210,6 +222,7 @@ def main():
         Utils.add_log('[OK] Conexão com smart cloud fechada', 'log_geral.log')
     except:
         Utils.add_log('[OK] Conexão com smart cloud fechada', 'log_geral.log')
+
 
 def parse_args():
     """
