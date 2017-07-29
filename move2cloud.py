@@ -121,6 +121,11 @@ def main():
                 status, data = dest_conn.select(pastas[pasta])
             except:
                 try:
+                    dest_conn = Utils.connect(servidor='imap.notes.na.collabserv.com', porta=993, SSL=True)
+                except:
+                    Utils.add_log('[ERROR] Não foi possivel se reconectar ao servidor SMART CLOUD', log_name)
+                    exit(2)
+                try:
                     dest_conn.login(dest_email, dest_passwd)
                     Utils.add_log('[OK] Reconectado ao email de destino: ' + dest_email, log_name)
                 except:
@@ -128,6 +133,10 @@ def main():
                                   log_name)
                     Utils.db_set_account_history(conn=db_conn, account_id=account['id'], sucessfull=False)
                     continue
+                try:
+                    status, data = dest_conn.select(pastas[pasta])
+                except:
+                    Utils.add_log('[ERROR] Connection time-out with Smart Cloud', log_name)
 
             if 'NO' in status:
                 dest_conn.create(pastas[pasta])

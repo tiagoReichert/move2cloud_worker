@@ -25,7 +25,6 @@ class Utils:
     def __init__(self):
         pass
 
-
     @staticmethod
     def db_connection(ip, port, password):
         try:
